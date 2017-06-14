@@ -1,9 +1,14 @@
 RM=/bin/rm
 CC=/usr/bin/gcc
 OUTPUT_PATH=../build
-CFLAGS=-g -Wall -O3 -I /usr/local/include -L /usr/local/lib/mysql -l mysqlclient
-MAKE=/usr/bin/make
+CFLAGS=-g -Wall -O3 
+CFLAGS_MySQL=-lmysqlclient
+CFLAGS_GPS=-lgps -lm  
 
-all: GPS_client
-GPS_client:
-	${CC} ${CFLAGS} -o ${OUTPUT_PATH}/GPS_client GPS_client.c -lgps -lm
+all: BUILD
+
+BUILD:
+	${CC} ${CFLAGS} -o ${OUTPUT_PATH}/GPS_client GPS_client.c ${CFLAGS_GPS} ${CFLAGS_MySQL}
+	${CC} ${CFLAGS} -o ${OUTPUT_PATH}/simpleGPS simpleGPS.c ${CFLAGS_GPS}
+	${CC} ${CFLAGS} -o ${OUTPUT_PATH}/InsertString InsertString.c
+	${CC} ${CFLAGS} -o ${OUTPUT_PATH}/strcat strcat.c
