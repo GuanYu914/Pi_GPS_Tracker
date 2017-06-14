@@ -3,23 +3,22 @@
 #include <string.h>
 #include <gps.h>
 #include <mysql/mysql.h>
-//Macro
+//Macros
 #define HOST_NAME    "140.128.13.39"
 #define DB_USER      "Bike_manager"
 #define DB_USER_PWSD "manager"
 #define DB_NAME      "PU_Bike"
 #define HOST_PORT    7777
-//Function
-char *   DoubleToString(double);
-double * get_Location(void);
-void     mysql_Connect(void);
-void     mysql_InstructionQuery(char *);
-char *   mysql_InstructionMerge(char *, int, char *, int, char *);
+//Functions
+char   *DoubleToString(double);
+char   *substring(char *, int, int);
+double *get_Location(void);
+void    mysql_Connect(void);
+void    mysql_InstructionQuery(char *);
+int    *mysql_InstructionMerge(char *, int, char *, int, char *);
 //Global Objects
 MYSQL mysql;
 loc_t gps_data;
-//Global Variable
-double loc_arr[2];
 
 int main(void)
 {
@@ -27,25 +26,45 @@ int main(void)
 	mysql_Connect();
 	while(1)
 	{
-		double lat = get_Location()[0];
-		double lon = get_Location()[1];
-		printf("latitude:  %lf\r\nlongitude: %lf\r\n", lat, lon);	
-		mysql_InstructionMerge(DoubleToString(lat), 0, DoubleToString(lon), 0,  "INSERT INTO GPS_Info VALUES()");
+		//double lat = get_Location()[0];
+		//double lon = get_Location()[1];
+		//char *instruction = "INSERT INTO GPS_Info VALUES()";
+		mysql_InstructionMerge(DoubleToString(23.111), 29, DoubleToString(120.586), 36, instruction);
+		//printf("%s\n",instruction);
 		break;
 	}
 	mysql_close(&mysql);	
 	return EXIT_SUCCESS;
 }
 
-char * DoubleToString(double x)
+char *DoubleToString(double x)
 {
-	char s[20] = "";
-	sprintf(s, "%lf", x);
-	return s;
+	char *str = malloc(20 * sizeof(char));
+	sprintf(str, "%lf", x);
+	return str;
 }
 
-double * get_Location(void)
+char *substring(char *string, int pos, int len)
 {
+	char *ptr;
+	int c;
+	ptr = malloc(len+1);
+	if(ptr == NULL)
+	{
+		exit(EXIT_FAILURE);
+	}
+	for(c = 0; c < len; c++ )
+	{
+		*(ptr + c) = *((string+pos-1)+c);	
+	}
+	*(ptr+c) = '\0';
+	
+	return ptr;
+}
+
+double *get_Location(void)
+{
+	double *loc_arr = malloc(2 * sizeof(double));
 	gps_location(&gps_data);
 	loc_arr[0] = gps_data.latitude;
 	loc_arr[1] = gps_data.longitude;
@@ -78,11 +97,29 @@ void mysql_InstructionQuery(char *instruction)
 	}		
 }
 
-char * mysql_InstructionMerge(char *substr1, int pos1, char *substr2, int pos2, char *Instruction)
+int *mysql_InstructionMerge(char *substr1, int pos1, char *substr2, int pos2, char *Instruction)
 {
-	//char newInstruction[100];
-	//newInstruction = strcat(Instruction, substr1);
-	//newInstruction = strcat(newInstruction, substr2);
-	//printf("%s\n", newInstruction);
-	return "test";		
+	char *f, *e, *g, *h;
+	int len = strlen(Instruction);
+	printf("fucker\n");
+	f = substring(Instruction, 1, pos1-1);
+	e = substring(Instruction, pos1, len-pos1+1);
+	strcpy(Instruction, "");
+	strcat(Instruction, f);
+	free(f);
+	strcat(Instruction, substr1);
+	strcat(Instruction, e);
+	free(e);
+    printf("fucker\n");	
+	g = substring(Instruction, 1, pos2-1);
+	h = substring(Instruction, pos2, len-pos2+1);
+	strcpy(Instruction, "");
+	strcat(Instruction, g);
+	free(g);
+	strcat(Instruction, substr2);
+	strcat(Instruction, h);
+	free(h);	
+	return 0;
 }
+
+
