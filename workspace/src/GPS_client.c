@@ -28,7 +28,7 @@ int main(void)
 	{
 		//double lat = get_Location()[0];
 		//double lon = get_Location()[1];
-		//char *instruction = "INSERT INTO GPS_Info VALUES()";
+		char *instruction = "INSERT INTO GPS_Info VALUES()";
 		mysql_InstructionMerge(DoubleToString(23.111), 29, DoubleToString(120.586), 36, instruction);
 		//printf("%s\n",instruction);
 		break;
