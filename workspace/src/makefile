@@ -10,5 +10,3 @@ all: BUILD
 BUILD:
 	${CC} ${CFLAGS} -o ${OUTPUT_PATH}/GPS_tracker GPS_tracker.c ${CFLAGS_GPS} ${CFLAGS_MySQL}
 	${CC} ${CFLAGS} -o ${OUTPUT_PATH}/simpleGPS simpleGPS.c ${CFLAGS_GPS}
-	${CC} ${CFLAGS} -o ${OUTPUT_PATH}/InsertString InsertString.c
-	${CC} ${CFLAGS} -o ${OUTPUT_PATH}/strcat strcat.c
