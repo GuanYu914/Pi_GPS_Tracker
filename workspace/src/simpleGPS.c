@@ -3,9 +3,8 @@
 #include <gps.h>
 
 int main(void) {
-    // Open
+    //gps_initialize
     gps_init();
-
     loc_t data;
 
     while (1) {
