@@ -4,18 +4,24 @@
 #include <gps.h>
 #include <mysql/mysql.h>
 //Macros
-#define HOST_NAME    "140.128.13.39"
-#define DB_USER      "Bike_manager"
-#define DB_USER_PWSD "manager"
-#define DB_NAME      "PU_Bike"
-#define HOST_PORT    7777
+#define HOST_NAME       "140.128.13.39"
+#define DB_USER         "Bike_manager"
+#define DB_USER_PWSD    "manager"
+#define DB_NAME         "PU_Bike"
+#define HOST_PORT       7777
+//Instruction Macros
+#define TABLE_NAME            "GPS_Info"
+#define COL_NAME_1            "Latitude"
+#define COL_NAME_2            "Longitude"
+#define SEARCH_COL_NAME       "No_CAR"
+#define SEARCH_COL_NAME_VALUE "\"PU_001\""
 //Functions
 char   *DoubleToString(double);
-char   *substring(char *, int, int);
-double *get_Location(void);
+char   *Substring(char *, int, int);
+double *GetLocation(void);
 void    mysql_Connect(void);
 void    mysql_InstructionQuery(char *);
-char   *mysql_InstructionMerge_1(char *, char *, char *);
+char   *mysql_InstructionMerge_1(char *, char *, char *, char *, char *, char *, char *);
 //Global Objects
 MYSQL mysql;
 loc_t gps_data;
@@ -26,12 +32,9 @@ int main(void)
 	mysql_Connect();
 	while(1)
 	{
-		//double lat = get_Location()[0];
-		//double lon = get_Location()[1];
-		char *instruction_1 = malloc(5 * sizeof(char)); 
-		instruction_1 = "INSERT INTO GPS_Info VALUES()";
-		mysql_InstructionQuery(mysql_InstructionMerge_1(DoubleToString(23.111), DoubleToString(120.586), instruction_1));
-		break;
+		double lat = GetLocation()[0];
+		double lon = GetLocation()[1];
+		mysql_InstructionQuery(mysql_InstructionMerge_1(TABLE_NAME, COL_NAME_1, DoubleToString(lat), COL_NAME_2, DoubleToString(lon), SEARCH_COL_NAME, SEARCH_COL_NAME_VALUE));
 	}
 	mysql_close(&mysql);	
 	return EXIT_SUCCESS;
@@ -44,7 +47,7 @@ char *DoubleToString(double x)
 	return str;
 }
 
-char *substring(char *string, int pos, int len)
+char *Substring(char *string, int pos, int len)
 {
 	char *ptr;
 	int c;
@@ -62,7 +65,7 @@ char *substring(char *string, int pos, int len)
 	return ptr;
 }
 
-double *get_Location(void)
+double *GetLocation(void)
 {
 	double *loc_arr = malloc(2 * sizeof(double));
 	gps_location(&gps_data);
@@ -82,7 +85,7 @@ void mysql_Connect(void)
 		printf("ERROR: Failed to connect MySQL: %s\n",mysql_error(&mysql));
 	}else
 	{
-		printf("MySQL Server Ver is %s\n",mysql_get_server_info(&mysql));
+		printf("MySQL Server Ver is %s.\n",mysql_get_server_info(&mysql));
 	}
 }
 
@@ -93,40 +96,30 @@ void mysql_InstructionQuery(char *instruction)
 		printf("ERROR: Failed to send mysql instruction: %s\n",mysql_error(&mysql));
 	}else
 	{
-		printf("SUCES: Successfully send mysql instructions\n");	
+		printf("SUCES: Send mysql instruction successfully.\n");	
 	}		
 }
 
-char *mysql_InstructionMerge_1(char *substr1, char *substr2, char *Instruction)
+char *mysql_InstructionMerge_1(char *table_name, char *col_name_1, char *col_value_1, char *col_name_2, char *col_value_2, char *search_col, char *search_col_name)
 {
-	/*This function only support to "INSERT INTO TABLE_NAME VALUES()" instruction.*/
+	/*This function only support to "UPDATE TABLE_NAME COL_NAME = , COL_NAME = WHERE COL_NAME = " instruction.*/
 	
-	
-	char *f, *e;
-	int len = strlen(Instruction);
-	int pos = len;
-	
-	char *str = malloc(15 * sizeof(char));
 	char *newInstruction = malloc(45 * sizeof(char));
-	strcpy(str, "");
-	strcat(str, substr1);
-	strcat(str, ", ");
-	strcat(str, substr2);
-	printf("%s\n", str);
 
-	//printf("%d\n", len);
-	f = substring(Instruction, 1, pos - 1);
-	//printf("%s\n", f);
-	e = substring(Instruction, pos, len - pos + 1);
-	//printf("%s\n", e);
-	strcpy(newInstruction, "");
-	strcat(newInstruction, f);
-	free(f);
-	strcat(newInstruction, str);
-	free(str);
-	strcat(newInstruction, e);
-	free(e);
-	printf("%s\n", newInstruction);
-
+	strcpy(newInstruction, "UPDATE ");
+	strcat(newInstruction, table_name);
+	strcat(newInstruction, " SET ");
+	strcat(newInstruction, col_name_1);
+	strcat(newInstruction, " = ");
+	strcat(newInstruction, col_value_1);
+	strcat(newInstruction, ", ");
+	strcat(newInstruction, col_name_2);
+	strcat(newInstruction, " = ");
+	strcat(newInstruction, col_value_2);
+	strcat(newInstruction, " WHERE ");
+	strcat(newInstruction, search_col);
+	strcat(newInstruction, " = ");
+	strcat(newInstruction, search_col_name);	
+	
 	return newInstruction;
 }
