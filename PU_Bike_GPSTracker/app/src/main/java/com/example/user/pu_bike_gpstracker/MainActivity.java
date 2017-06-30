@@ -12,6 +12,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
@@ -27,12 +28,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 {
 
     private GoogleMap                  PU_Bike_Map;
+    private Marker                     Bike_marker;
     private Handler                    HttpReq_Timer;
     private String                     TAG = MainActivity.class.getSimpleName();
-    private static String              url = "http://140.128.13.39/App/db_view.php";
-    private static String              No_CAR;
-    private static double              lat;
-    private static double              lon;
+    private String                     url = "http://140.128.13.39/App/db_view.php";
+    private String                     No_CAR;
+    private double                     lat;
+    private double                     lon;
+    private int                        CameraZoomLevel = 18;
 
     private final int                  interval = 1000; //1000ms = 1s
 
@@ -42,10 +45,25 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "Program is created.");
         setContentView(R.layout.activity_main);
         GPS_Info_List = new ArrayList<>();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(map);
         mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        Log.d(TAG, "Program is paused.");
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        Log.d(TAG, "Program is destroyed.");
+        super.onDestroy();
     }
 
     @Override
@@ -59,17 +77,26 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void run()
             {
-                Log.d(TAG, "run was called.");
+                if(Bike_marker != null)
+                {
+                    Bike_marker.remove();
+                }
+                Log.d(TAG, "HttpRqe_run was called.");
                 new HttpReq().execute();
-                LatLng pos = new LatLng(lat, lon);
-                PU_Bike_Map.addMarker(new MarkerOptions().position(pos).title(No_CAR+"'s position."));
-                PU_Bike_Map.moveCamera(CameraUpdateFactory.newLatLng(pos));
+                if(lat != 0 && lon != 0)
+                {
+                    LatLng Bike_pos = new LatLng(lat, lon);
+                    Bike_marker= PU_Bike_Map.addMarker(new MarkerOptions().position(Bike_pos).title(No_CAR + "'s position."));
+                    PU_Bike_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(Bike_pos, CameraZoomLevel));
+
+                }
                 HttpReq_Timer.postDelayed(this, interval);
             }
         };
 
         HttpReq_Timer.postDelayed(runnable, interval);
     }
+
 
 
     class HttpReq extends AsyncTask<Void, Void, Void>
