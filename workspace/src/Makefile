@@ -8,5 +8,6 @@ CFLAGS_GPS=-lgps -lm
 all: BUILD
 
 BUILD:
+	@echo "Start to build outputfile..."
 	${CC} ${CFLAGS} -o ${OUTPUT_PATH}/GPS_tracker GPS_tracker.c ${CFLAGS_GPS} ${CFLAGS_MySQL}
 	${CC} ${CFLAGS} -o ${OUTPUT_PATH}/simpleGPS simpleGPS.c ${CFLAGS_GPS}
